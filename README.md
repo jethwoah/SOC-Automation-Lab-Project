@@ -42,3 +42,8 @@ Integrating Wazuh, TheHive, and Shuffle to automate alert handling, case creatio
 
 ## Section 1: Platforms and Endpoint Preparation
 ### 1.1. Setup Windows 11 Virtual Machine
+A Windows 11 Pro Virtual Machine has been setup in VirtualBox with Sysmon configured.
+
+![](/screenshots/vm.png)
+
+
