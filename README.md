@@ -1,2 +1,2 @@
 # SOC-Automation-Lab-Project
-testsalkdjsalkdjaslkdas
+In this lab we will be 
