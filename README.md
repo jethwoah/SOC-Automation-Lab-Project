@@ -57,12 +57,41 @@ A resource group named "soc-lab-rg" is set up. All our resources including the W
 ![](/screenshots/azure_rg.png)
 
 ### 1.2.1 Wazuh Server Deployment
-For the server that will host Wazuh, an Ubuntu 24.04 LTS VM was deployed. Named wazuh-server and was deployed to have 4 vCPUs and 8 GBs of RAM. This server will host our SIEM/XDR. 
+For the server that will host Wazuh, an Ubuntu 24.04 LTS VM was deployed. Named wazuh-server and was deployed to have 4 vCPUs and 8 GBs of RAM. This server will host our SIEM/XDR. Initially, SSH is enabled within the network settings of this VM to allow access to the VM using our local machine.
+
+We can take note of the assigned public IP address for this server which is:
+    Wazuh Server Public IP: 20.205.120.231
 
 ![](/screenshots/azure_wazuh.png)
 
 
 ### 1.2.2 TheHive Server Deployment
-For the TheHive server, a slightly more powerful Ubuntu 24.04 LTS VM was with 16 GB of RAM was used since TheHive requiers heavier backend components and is used for investigation and case tracking. This VM was named thehive. 
+For the TheHive server, a slightly more powerful Ubuntu 24.04 LTS VM was with 16 GB of RAM was used since TheHive requiers heavier backend components and is used for investigation and case tracking. This VM was named thehive. Like the Wazuh server, SSH is also enabled initially for this VM.
+
+We can also take note of the assigned public IP address for this server which is:
+
+    TheHive Server Public IP: 20.89.254.38
 
 ![alt text](azure_thehive-1.png)
+
+## 1.3 SSH Access to Azure-based VMs and Update Ubuntu.
+
+### 1.3.1. Acesss Azure VMs using SSH
+To access our Azure VMs from our local machine, we can use secure shell or SSH. An SSH key-based authentication was set up to ensure a secure connection.
+
+SSH key-based authentication uses a pair of cryptographic keys: a private key stored securely on the local machine and a public key placed on the server. When connecting, the server verifies the private key without transmitting it over the network. This approach is more secure than password-based authentication.
+
+To SSH onto our Azure VMs, we can use the command:
+
+    ssh -i <PRIVATE_KEY_FILE>.pem <USERNAME>@<SERVER_PUBLIC_IP>
+
+We used Windows Powershell to enter this command to access both servers. The default username for these is "azureuser". It's also important that when performing this command, we must be in the same directory as the .pem or SSH key. As shown in the screenshots below.
+
+
+For the Wazuh Server:
+![alt text](wazuh_ssh.png)
+
+For TheHive Server:
+![alt text](thehive_ssh-1.png)
+
+With this SSH connection, we have now established a connection to our VMs we configured earlier in Azure. We can now install our platforms in these VMs and configure them.
