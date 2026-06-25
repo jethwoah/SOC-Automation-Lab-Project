@@ -9,5 +9,15 @@ This SOC automation lab simulates how a security team detects, manages, and resp
 5. USe Mimikatz in a Windows VM to generate malicious telemetry  
 6. Use logs from Sysmon
 
-# Lab Topology and Plan
-flowchart TD A["Windows Endpoint"] --> B["Sysmon / Wazuh Agent"] B --> C["Wazuh SIEM/XDR"] C --> D["Shuffle SOAR"] D --> E["TheHive Case Management"] E --> F["Analyst Notification / Response Action"]
+# Roadmap
+Basic Flow:
+```mermaid
+flowchart TD
+    A["Windows Endpoint"] --> B["Sysmon / Wazuh Agent"]
+    B --> C["Wazuh SIEM/XDR"]
+    C --> D["Shuffle SOAR"]
+    D --> E["TheHive Case Management"]
+    E --> F["Analyst Notification / Response Action"]
+```
+
+Activity on the Windows endpoint is captured by Sysmon and the Wazuh agent, which send logs to the Wazuh SIEM/XDR for analysis and alert generation. Alerts are then passed to Shuffle, which automates workflows such as creating cases in TheHive. Finally, TheHive organizes the incident for investigation and can trigger notifications or response actions by the analyst.
