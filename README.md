@@ -1,2 +1,2 @@
 # SOC-Automation-Lab-Project
-In this lab we will be 
+This SOC automation lab simulates how a security team detects, manages, and responds to alerts. Wazuh is used for log collection and detection, TheHive is used for case management, and Shuffle is used to automate the workflow between tools. The lab demonstrates endpoint telemetry, alert generation, case creation, analyst notification, and basic incident response automation.
