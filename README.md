@@ -73,7 +73,7 @@ We can also take note of the assigned public IP address for this server which is
 
     TheHive Server Public IP: 20.89.254.38
 
-![alt text](azure_thehive-1.png)
+![alt text](/screenshots/azure_thehive-1.png)
 
 ## 1.3 SSH Access to Azure-based VMs and Update Ubuntu.
 
@@ -90,10 +90,10 @@ We used Windows Powershell to enter this command to access both servers. The def
 
 
 SSH to the Wazuh Server:
-![alt text](wazuh_ssh.png)
+![alt text](/screenshots/wazuh_ssh.png)
 
 SSH to TheHive Server:
-![alt text](thehive_ssh-1.png)
+![alt text](/screenshots/thehive_ssh-1.png)
 
 ### 1.3.2 Ubuntu Updates
 Now that we have SSH connection to both our VMs, we can go ahead and update our Ubuntu package repositories. 
@@ -109,10 +109,52 @@ We can use the command:
  - -y: Automatically confirms prompts to proceed with the upgrade
 
 Wazuh Server Update:
-![alt text](wazuh_ubuntu_update-1.png)
+![alt text](/screenshots/wazuh_ubuntu_update-1.png)
 
 TheHive Server Update:
-![alt text](thehive_ubuntu_update-1.png)
+![alt text](/screenshots/thehive_ubuntu_update-1.png)
 
 
 With this SSH connection and Ubuntu updates, we now have an established connection from our local machine to our updated VMs that we configured earlier in Azure. We can now install our platforms in these VMs and configure them.
+
+## 1.4 Wazuh Installation
+Wazuh was installed on the Azure Ubuntu server using the Wazuh installation assistant.
+
+The main command used is:
+
+    curl -sO https://packages.wazuh.com/4.14/wazuh-install.sh && sudo bash ./wazuh-install.sh -a
+
+The screenshot below shows that Wazuh has already been installed. This is because I have already installed Wazuh previously, but no harm in still entering the command.
+
+![alt text](wazuh_installing.png)
+
+Wazuh will be used as the main SIEM/XDR component of the lab. It will collect logs, analyze events, and generate alerts from monitored endpoints.
+
+Wazuh installed:
+![alt text](wazuh_showing_installed.png)
+
+
+## 1.5 TheHive Installation
+Unlike Wazuh, installing TheHive requires more steps.
+
+For the brevity of this document, refer to TheHive website for instructions for steps 1.5.1 - 1.5.4. 
+
+### 1.5.1 Install required dependencies
+
+### 1.5.2 Set up the Java virtual machine (JVM)
+
+### 1.5.3 Install and configure Apache Cassandra
+
+### 1.5.4 Install and configure Elasticsearch
+
+### 1.5.5 Install and configure TheHive
+With the previous pre-requisites being installed, we can now download the installation packages for TheHive and finally  install it.
+
+To Install TheHive, use the command:
+
+    sudo apt-get install /tmp/thehive_5.7.3-1_all.deb
+
+![alt text](thehive_installed.png)
+
+Verifying that TheHive, Elasticsearch, and Cassandra are installed:
+![alt text](thehive_showing_installed-1.png)
