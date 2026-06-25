@@ -8,3 +8,6 @@ This SOC automation lab simulates how a security team detects, manages, and resp
 4. Configure Shuffle.io as the SOAR
 5. USe Mimikatz in a Windows VM to generate malicious telemetry  
 6. Use logs from Sysmon
+
+# Lab Topology and Plan
+flowchart TD A["Windows Endpoint"] --> B["Sysmon / Wazuh Agent"] B --> C["Wazuh SIEM/XDR"] C --> D["Shuffle SOAR"] D --> E["TheHive Case Management"] E --> F["Analyst Notification / Response Action"]
