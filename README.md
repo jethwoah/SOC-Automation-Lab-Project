@@ -130,7 +130,7 @@ The screenshot below shows that Wazuh has already been installed. This is becaus
 
 Wazuh will be used as the main SIEM/XDR component of the lab. It will collect logs, analyze events, and generate alerts from monitored endpoints.
 
-Wazuh installed:
+Verifying that Wazuh is installed:
 ![alt text](wazuh_showing_installed.png)
 
 
@@ -158,3 +158,35 @@ To Install TheHive, use the command:
 
 Verifying that TheHive, Elasticsearch, and Cassandra are installed:
 ![alt text](thehive_showing_installed-1.png)
+
+## 1.6 Logging into Wazuh and TheHive
+Now that Wazuh and TheHive have been installed, we can try logging into them using our browser.
+
+To login to our Wazuh Server using our web broswer we can simply type in
+
+    https://[WAZUH-SERVER-PUBLIC-IP]
+
+Which for our case is https://20.205.120.231/
+
+However, upon trying this, we can see that we get a timeout error. Meaning our browser cannot connect to our Wazuh Server
+![alt text](wazuh_timeout.png)
+
+To login to our TheHive on the other hand, we can type in
+
+    http://[THEHIVE-SERVER-PUBLIC-IP]:9000
+
+However, like our Wazuh Server, this is giving us a timeout error.
+![alt text](thehive_timeout.png)
+
+So we must troubleshoot to figure out what is causing this and fix the issue.
+
+### 1.6.1 Troubleshooting Wazuh and TheHive Servers
+The first thing to check if there is a Firewall set up within our virtual network within Azure.
+
+To do this we can simply go to Azure Portal -> Virtual Networks -> [virtual-network] -> Settings -> Firewall
+
+For both our Vnets, there are no firewalls that exist. So we can eliminate this potential cause.
+
+![alt text](wazuh_firewall.png)
+
+![alt text](thehive_firewall.png) 
