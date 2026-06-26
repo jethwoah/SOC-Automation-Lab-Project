@@ -181,7 +181,7 @@ However, like our Wazuh Server, this is giving us a timeout error.
 So we must troubleshoot to figure out what is causing this and fix the issue.
 
 ### 1.6.1 Troubleshooting Wazuh and TheHive Servers
-The first thing to check if there is a Firewall set up within our virtual network within Azure.
+The first thing to check if there is a Firewall set up in our virtual network within Azure.
 
 To do this we can simply go to Azure Portal -> Virtual Networks -> [virtual-network] -> Settings -> Firewall
 
