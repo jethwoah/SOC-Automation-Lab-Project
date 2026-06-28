@@ -1,5 +1,6 @@
-# SOC-Automation-Lab-Project
+# SOC Automation Lab Project
 This SOC automation lab simulates how a security team detects, manages, and responds to alerts. Wazuh is used as the SIEM, TheHive is used for case management, and Shuffle is used as the SOAR to automate the workflow. The lab demonstrates endpoint telemetry, alert generation, case creation, analyst notification, and basic incident response automation.
+
 
 # Lab Objectives
 1. Simulate a SOC workflow from detection to investigation and response
@@ -130,8 +131,7 @@ The screenshot below shows that Wazuh has already been installed. This is becaus
 
 Wazuh will be used as the main SIEM/XDR component of the lab. It will collect logs, analyze events, and generate alerts from monitored endpoints.
 
-Verifying that Wazuh is installed:
-![alt text](wazuh_showing_installed.png)
+
 
 
 ## 1.5 TheHive Installation
@@ -156,10 +156,9 @@ To Install TheHive, use the command:
 
 ![alt text](thehive_installed.png)
 
-Verifying that TheHive, Elasticsearch, and Cassandra are installed:
-![alt text](thehive_showing_installed-1.png)
 
-## 1.6 Logging into Wazuh and TheHive
+
+## 1.6 Logging Into Wazuh and TheHive
 Now that Wazuh and TheHive have been installed, we can try logging into them using our browser.
 
 To login to our Wazuh Server using our web broswer we can simply type in
@@ -181,6 +180,9 @@ However, like our Wazuh Server, this is giving us a timeout error.
 So we must troubleshoot to figure out what is causing this and fix the issue.
 
 ### 1.6.1 Troubleshooting Wazuh and TheHive Servers
+
+### 1.6.1.1 Firewalls
+
 The first thing to check if there is a Firewall set up in our virtual network within Azure.
 
 To do this we can simply go to Azure Portal -> Virtual Networks -> [virtual-network] -> Settings -> Firewall
@@ -190,3 +192,205 @@ For both our Vnets, there are no firewalls that exist. So we can eliminate this 
 ![alt text](wazuh_firewall.png)
 
 ![alt text](thehive_firewall.png) 
+
+
+### 1.6.1.2 Check if Services are Running
+
+A possible reason for our timeout is simply that Wazuh and TheHive are simply not running. We can verify these services are running using the commands: 
+
+    systemctl is-active <service-name>
+
+ - systemctl = controls/checks Linux system services.
+ - is-active = checks if a service is currently running.
+ - service-name = the service you want to check, like thehive, cassandra, or wazuh-manager.
+ - active = service is running.
+ - inactive = service is installed but not running.
+ - failed = service tried to run but encountered an error.
+
+This checks whether a Linux service is currently running.
+
+For the Wazuh server, we can see that the Wazuh services are running, so no issue here.  
+
+Verifying if Wazuh service is running:
+![alt text](screenshots/wazuh_showing_installed.png)
+
+Also for the TheHive server, we can see that all the required services are running.
+
+Verifying that TheHive service is running:
+![alt text](screenshots/thehive_showing_installed-1.png)
+
+So we have confirmed that the services are actively running, so we can eliminate this potential issue.
+
+### 1.6.1.3 Verify if HTTPS port is Enabled
+Another possible cause of the timeout issue is that HTTPS traffic is not allowed in our Azure Network Security Groups. Since the Wazuh and TheHive dashboards are accessed through HTTPS, port 443 must be enabled. If this inbound port is blocked, the browser will not be able to reach the Wazuh and TheHive servers even if the services are  running properly and no firewalls are set up.
+
+
+To do this we can configure our VM network settings in Azure. Go to Azure Portal -> Virtual Machine -> Network Settings
+
+Inspecting our current network settings, we can see that SSH or port 22 is the only inbound port enabled. No wonder we can't connect to our Servers via HTTPS, but can access it via powershell using SSH.
+![alt text](screenshots/azure_no_port.png)
+
+Our inbound port rules for TheHive VM, the same issue exists. So the next step is to simply add a rule to allow inbound HTTPS (port 443) traffic, to be safe we can also enable HTTP (port 80).
+
+In the same window, we can simply click on "Create port rule" and configure our settings.
+![alt text](screenshots/azure_port.png)
+
+Now, we can see that inbound traffic to port 443 or HTTP has been enabled for the network group. 
+![alt text](screenshots/azure_port_configured.png)
+
+We can perform the same configurations for the TheHive VM. 
+
+### 1.6.2 Check if we can now login to Wazuh and TheHive
+
+Entering https://[WAZUH-SERVER-PUBLIC-IP] onto our URL field in our browser, we can now access our Wazuh server. 
+
+We have successfully troubleshooted our timeout error earlier for our Wazuh Server. The cause of the problem was that inbound HTTPS traffic was blocked in our VMs' network security groups. Enabling this port solved our problem. 
+
+![alt text](screenshots/wazuh_login.png)
+
+Although for now, we still can't access TheHive through our browser, a timeout error still persists at this point. That is because additional configuration must still be done, which we will be doing in the next section
+
+# Section 2: Server and Endpoint Configuration
+
+This section focuses on configuring the deployed servers and endpoint so they can begin communicating with each other.
+
+## Section 2.1: Configure TheHive
+In this section of the lab, we will configure TheHive and its required backend services (Cassandra and Elastisearch) so it can function as the case management platform for our SOC environment. We will update Cassandra, Elasticsearch, and TheHive’s application configuration to use the correct server settings.
+
+### Section 2.1.1 Configuring Cassandra for TheHive
+
+To configure Cassandra, we must first open it's main configuration file, using the command:
+
+    sudo nano /etc/cassandra/cassandra.yaml
+
+ - sudo = run as admin/root
+ - nano = text editor
+ - cassandra.yaml = Cassandra config file
+
+ We can now change our "cluster_name" to personalize it. For this lab, I just chose to name it "JethLabCassandra"
+
+ ![alt text](cassandra_clustername.png)
+
+ Then we can change our Listening Address, since the Cassabdra .yaml configuration file contains hundreds of lines, to make our work easier, we can use "Where Is" to find the word listen in our conf file, using the hotkey "^W". 
+ 
+ We can change our listen_address from "localhost" to the public IP address of our TheHive Server which is "20.89.254.38"
+
+ This tells Cassandra what network address to listen on.
+
+ ![alt text](cassandra_listenaddress.png)
+ 
+ Next we must change our rpc_address, using the same hotkey ("^W"), to find it in our config file. We must also change this to the public IP address of the TheHive server.
+
+ RPC is how applications, like TheHive, communicate with Cassandra.
+
+ ![alt text](cassandra_rpcaddress.png)
+
+Lastly, we must configure our seed. Again, we just change this to the public IP address, but maintaining the default port.
+
+The seed tells Cassandra where the main node is. Since this is a single-server lab, it points to itself.
+
+ ![alt text](cassandra_seed.png)
+
+ Now we can finally save our cassandra configuration file by pressing ^X to exit, then Y to save the file, then just press enter. 
+
+ To properly implement our changes, we must first stop the cassandra service, using the command
+    
+    systemctl stop cassandra.service
+
+This stops Cassandra before applying the new config.
+
+ - systemctl = manages Linux services
+ - stop cassandra = stops the Cassandra service
+
+ Then we must remove the old Cassandra database files. We must do this  because changing the cluster name can conflict with the old stored data.
+
+
+    sudo rm -rf /var/lib/cassandra/*
+
+ - sudo = runs the command with administrator/root privileges.
+ - rm  = removes/deletes files or folders.
+ - -r = deletes folders and everything inside them.
+ - -f  = force deletes without asking for confirmation
+ - /var/lib/cassandra/*  = targets all contents inside Cassandra’s data directory, but not the folder itself.
+
+ Now we can start the Cassandra service using the command
+
+    systemctl start cassandra.service
+
+Which is similar to the previous stop command, but changing "stop" for "start". This simply starts the service. 
+
+Then we can verify the status of our service using
+
+    systemctl status cassandra.service
+
+![alt text](cassandra_activepostconfig.png)
+
+### Section 2.1.2 Configuring Elasticsearch for TheHive
+
+Similar to our Cassandra configuration, we must first open the elasticsearch config file. We can use the command
+
+    nano /etc/elasticsearch/elasticsearch.yml
+
+Again, like in our Cassandra config, the next step is to change our cluster name. 
+We can uncomment the cluster-name line and rename it. To follow our previous naming style in Cassandra, I'm just going to rename this as JethLabElasticsearch 
+
+We must also uncomment the node.name line. This names this Elasticsearch server as node-1. Since this is only one VM, one node is enough.
+
+![alt text](elasticsearch_cluster_and_node.png)
+
+Next, we must configure our Network settings. First is to uncomment the network.host line and configure it to our public IP. This tells Elasticsearch what IP address to listen on. 
+
+We must also uncomment the http.port line, this sets the default port of 9200  (the API port) which TheHive will use to talk to Elasticsearch.
+
+![alt text](elasticsearch_nethost_and_port.png)
+
+Lastly is to configure our cluster, after uncommenting this line, we can remove "node-2" and just leave "node-1" alone. We do this since we only need to have one Elasticsearch node.
+
+![alt text](elasticsearch_clusternodes.png)
+
+Then again just save this file by pressing ^X to exit, then ^Y to save, then press Enter to save the filename.
+
+After editing our configuration file, we can now start and enable our elasticsearch service. Then check the status of this service. Using the same commands as we did during the Cassandra config, but of course, using elasticsearch as the service name in our commands.
+
+![alt text](elasticsearch_activepostconfig.png)
+
+### Section 2.1.2 Configuring TheHive
+
+Before proceeding we must change the TheHive directory ownership, which is stored in /opt/thp.
+
+Inspecting this directory, by first using "cd" to change to that directory, then using "ll" to list its contents. We can see that the thehive directory is currently owned by "root root".
+
+![alt text](thehive_rootroot.png)
+
+We must change this to be owned by "thehive", because currently this directory is only allowed access to the root. This command changes the permissions to the /thp folder, and will allow the TheHive service to properly access its own files.
+
+    chown -R thehive:thehive /opt/thp
+
+ - chown = change owner
+ - -R = applies changes to all files/folders inside. Thus changing permissions for the "thehive" directory inside /thp
+ - thehive:thehive = owner and group should be thehive
+ - /opt/thp = TheHive program directory
+
+ Using the command "ll" to list the contents of this directory again, we can verify that the permissions for the "thehive" directory has been changed to thehive.
+
+ ![alt text](thehive_thehive_permissions_updated.png)
+
+Now that the directory permissions has been configured. We can now perform the actual configurations for the TheHive service.
+
+Again, like the two previous services, we can edit the TheHive's config file using "nano" and specifying the config file's location. 
+
+    nano /etc/thehive/application.conf
+
+And similar to our previous configs, we must change the hostname to this server's public IP address. 
+
+For Cassandra under this config file, we must set the cluster name to match the previous, which is "JethLabCassandra". 
+
+And also for the Elasticsearch under this config file, the hostname must also be set to our public IP address.
+
+![alt text](thehive_configs_part1-1.png)
+
+Lastly, we must change the service's application base url by inputting the public IP address and maintaining the default port of 9000. This is the URL we will use later to access TheHive in our browser.
+
+![alt text](thehive_configs_part2.png)
+
+Then again simply exit and save the config file.
