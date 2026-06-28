@@ -250,7 +250,7 @@ We have successfully troubleshooted our timeout error earlier for our Wazuh Serv
 
 Although for now, we still can't access TheHive through our browser, a timeout error still persists at this point. That is because additional configuration must still be done, which we will be doing in the next section
 
-# Section 2: Server and Endpoint Configuration
+# Section 2: Servers and Endpoint Configuration
 
 This section focuses on configuring the deployed servers and endpoint so they can begin communicating with each other.
 
@@ -273,23 +273,26 @@ To configure Cassandra, we must first open it's main configuration file, using t
 
  Then we can change our Listening Address, since the Cassabdra .yaml configuration file contains hundreds of lines, to make our work easier, we can use "Where Is" to find the word listen in our conf file, using the hotkey "^W". 
  
- We can change our listen_address from "localhost" to the public IP address of our TheHive Server which is "20.89.254.38"
+    Note: For this Azure deployment, we use the private IP for Cassandra, Elasticsearch, and TheHive's internal configurations because these services communicate internally on the Azure VM. The public IP is only used for external access from the browser, while the private IP is the actual address assigned inside Ubuntu.
+
+ 
+ We can change our listen_address from "localhost" to the private IP address of our TheHive Server which is "10.0.0.4"
 
  This tells Cassandra what network address to listen on.
 
- ![alt text](cassandra_listenaddress.png)
+ ![](screenshots/cassandra_listenaddress.png)
  
- Next we must change our rpc_address, using the same hotkey ("^W"), to find it in our config file. We must also change this to the public IP address of the TheHive server.
+ Next we must change our rpc_address, using the same hotkey ("^W"), to find it in our config file. We must also change this to the private IP address of the TheHive server.
 
  RPC is how applications, like TheHive, communicate with Cassandra.
 
- ![alt text](cassandra_rpcaddress.png)
+ ![alt text](screenshots\cassandra_rpcaddress.png)
 
-Lastly, we must configure our seed. Again, we just change this to the public IP address, but maintaining the default port.
+Lastly, we must configure our seed. Again, we just change this to the private IP address, but maintaining the default port.
 
 The seed tells Cassandra where the main node is. Since this is a single-server lab, it points to itself.
 
- ![alt text](cassandra_seed.png)
+ ![alt text](screenshots\cassandra_seed.png)
 
  Now we can finally save our cassandra configuration file by pressing ^X to exit, then Y to save the file, then just press enter. 
 
@@ -323,7 +326,7 @@ Then we can verify the status of our service using
 
     systemctl status cassandra.service
 
-![alt text](cassandra_activepostconfig.png)
+![alt text](screenshots\cassandra_activepostconfig.png)
 
 ### Section 2.1.2 Configuring Elasticsearch for TheHive
 
@@ -338,11 +341,11 @@ We must also uncomment the node.name line. This names this Elasticsearch server 
 
 ![alt text](elasticsearch_cluster_and_node.png)
 
-Next, we must configure our Network settings. First is to uncomment the network.host line and configure it to our public IP. This tells Elasticsearch what IP address to listen on. 
+Next, we must configure our Network settings. First is to uncomment the network.host line and configure it to our private IP. This tells Elasticsearch what IP address to listen on. 
 
 We must also uncomment the http.port line, this sets the default port of 9200  (the API port) which TheHive will use to talk to Elasticsearch.
 
-![alt text](elasticsearch_nethost_and_port.png)
+![alt text](screenshots\elasticsearch_nethost_and_port.png)
 
 Lastly is to configure our cluster, after uncommenting this line, we can remove "node-2" and just leave "node-1" alone. We do this since we only need to have one Elasticsearch node.
 
@@ -385,12 +388,72 @@ And similar to our previous configs, we must change the hostname to this server'
 
 For Cassandra under this config file, we must set the cluster name to match the previous, which is "JethLabCassandra". 
 
-And also for the Elasticsearch under this config file, the hostname must also be set to our public IP address.
+And also for the Elasticsearch under this config file, the hostname must be set to our private IP address.
 
-![alt text](thehive_configs_part1-1.png)
+![alt text](screenshots\elasticsearch_nethost_and_port.png)
 
 Lastly, we must change the service's application base url by inputting the public IP address and maintaining the default port of 9000. This is the URL we will use later to access TheHive in our browser.
 
 ![alt text](thehive_configs_part2.png)
 
-Then again simply exit and save the config file.
+Then again simply exit and save the config file. 
+
+With the service being configured, we can start and enable it, then verify its status using again "start", "enable", "status" commands, as we used previously.
+
+![alt text](thehive_activepostconfig.png)
+
+Lastly, since we know access to the TheHive uses port 9000, we must allow this using the ufw tool.
+
+We allow port 9000 through UFW because TheHive uses port 9000 for its web interface. Even if TheHive is configured properly and its required services are running, the browser won't be able to reach it if the server firewall blocks inbound traffic on that port.
+
+    ufw allow 9000
+
+ - ufw = Ubuntu’s firewall tool
+ - allow = create a rule that permits traffic
+ - 9000 = allow TCP traffic on port 9000
+
+And now finally we can access TheHive. We can use the default credentials from TheHive's website.
+![alt text](screenshots/thehive_login.png)
+
+After signing in, we are greeted with the Organisation List of TheHive.
+![alt text](screenshots/thehive_landing.png)
+
+TheHive is now configured completely and is running and ready.
+
+## Section 2.2: Configure Wazuh
+For this step, we will access the Wazuh dashboard from inside the Windows VM so we can deploy and install the Wazuh agent directly on the test machine being monitored. This allows the Windows VM to register with the Wazuh manager and begin sending telemetry for detection and alerting.
+
+Since our Wazuh Server is publicly available, we can enter https://20.205.120.231/ in the URL field our browser within the Windows 11 VM to access it. We can use the default credentials of Wazuh to log in.
+
+
+We are greeted with Wazuh's dashboard after log in.
+![](screenshots\wazuh_dashboard.png)
+
+Now, we can go to Deploy a new agent by pressing the button. 
+
+We will select Windows MSI 32/64 bits. Set our server address to the Wazuh server's public IP. Set an agent name, for this lab, we'll name it "JethLab-Windows".
+
+![alt text](wazuh_config.png)
+
+Then we can install the agent inside our VM using the command provided.
+
+    Invoke-WebRequest -Uri https://packages.wazuh.com/4.x/windows/wazuh-agent-4.14.5-1.msi -OutFile $env:tmp\wazuh-agent; msiexec.exe /i $env:tmp\wazuh-agent /q WAZUH_MANAGER='20.205.120.231' WAZUH_AGENT_NAME='JethLab-Windows' 
+
+Then simply start the Wazuh service using the command
+    
+    net start wazuhsvc
+
+![](screenshots\wazuh_service_started.png)
+
+Wazuh uses ports 1515 and 1514, so we must enable these ports both using the UFW in our VMs, and within Azure
+
+![alt text](wazuh_ufw_ports_1515_1514.png)
+
+![alt text](azure_wazuh_allow_ports_1515_1514.png)
+
+And then restarting the Wazuh Service.
+![alt text](wazuh_restart.png)
+
+After these configurations, we can now see that we have an active agent in Wazuh, which is our Windows 11 VM.
+
+![alt text](wazuh_agent_active.png)
