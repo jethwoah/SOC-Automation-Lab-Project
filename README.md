@@ -91,9 +91,11 @@ We used Windows Powershell to enter this command to access both servers. The def
 
 
 SSH to the Wazuh Server:
+
 ![alt text](/screenshots/wazuh_ssh.png)
 
 SSH to TheHive Server:
+
 ![alt text](/screenshots/thehive_ssh-1.png)
 
 ### 1.3.2 Ubuntu Updates
@@ -127,7 +129,7 @@ The main command used is:
 
 The screenshot below shows that Wazuh has already been installed. This is because I have already installed Wazuh previously, but no harm in still entering the command.
 
-![alt text](wazuh_installing.png)
+![alt text](screenshots/wazuh_installing.png)
 
 Wazuh will be used as the main SIEM/XDR component of the lab. It will collect logs, analyze events, and generate alerts from monitored endpoints.
 
@@ -154,7 +156,7 @@ To Install TheHive, use the command:
 
     sudo apt-get install /tmp/thehive_5.7.3-1_all.deb
 
-![alt text](thehive_installed.png)
+![alt text](screenshots/thehive_installed.png)
 
 
 
@@ -168,14 +170,14 @@ To login to our Wazuh Server using our web broswer we can simply type in
 Which for our case is https://20.205.120.231/
 
 However, upon trying this, we can see that we get a timeout error. Meaning our browser cannot connect to our Wazuh Server
-![alt text](wazuh_timeout.png)
+![alt text](screenshots/wazuh_timeout.png)
 
 To login to our TheHive on the other hand, we can type in
 
     http://[THEHIVE-SERVER-PUBLIC-IP]:9000
 
 However, like our Wazuh Server, this is giving us a timeout error.
-![alt text](thehive_timeout.png)
+![alt text](screenshots/thehive_timeout.png)
 
 So we must troubleshoot to figure out what is causing this and fix the issue.
 
@@ -189,9 +191,9 @@ To do this we can simply go to Azure Portal -> Virtual Networks -> [virtual-netw
 
 For both our Vnets, there are no firewalls that exist. So we can eliminate this potential cause.
 
-![alt text](wazuh_firewall.png)
+![alt text](screenshots/wazuh_firewall.png)
 
-![alt text](thehive_firewall.png) 
+![alt text](screenshots/thehive_firewall.png) 
 
 
 ### 1.6.1.2 Check if Services are Running
@@ -269,7 +271,7 @@ To configure Cassandra, we must first open it's main configuration file, using t
 
  We can now change our "cluster_name" to personalize it. For this lab, I just chose to name it "JethLabCassandra"
 
- ![alt text](cassandra_clustername.png)
+ ![alt text](screenshots/cassandra_clustername.png)
 
  Then we can change our Listening Address, since the Cassabdra .yaml configuration file contains hundreds of lines, to make our work easier, we can use "Where Is" to find the word listen in our conf file, using the hotkey "^W". 
  
@@ -355,7 +357,7 @@ Then again just save this file by pressing ^X to exit, then ^Y to save, then pre
 
 After editing our configuration file, we can now start and enable our elasticsearch service. Then check the status of this service. Using the same commands as we did during the Cassandra config, but of course, using elasticsearch as the service name in our commands.
 
-![alt text](elasticsearch_activepostconfig.png)
+![alt text](screenshots/elasticsearch_activepostconfig.png)
 
 ### Section 2.1.2 Configuring TheHive
 
@@ -363,7 +365,7 @@ Before proceeding we must change the TheHive directory ownership, which is store
 
 Inspecting this directory, by first using "cd" to change to that directory, then using "ll" to list its contents. We can see that the thehive directory is currently owned by "root root".
 
-![alt text](thehive_rootroot.png)
+![alt text](screenshots/thehive_rootroot.png)
 
 We must change this to be owned by "thehive", because currently this directory is only allowed access to the root. This command changes the permissions to the /thp folder, and will allow the TheHive service to properly access its own files.
 
@@ -376,7 +378,7 @@ We must change this to be owned by "thehive", because currently this directory i
 
  Using the command "ll" to list the contents of this directory again, we can verify that the permissions for the "thehive" directory has been changed to thehive.
 
- ![alt text](thehive_thehive_permissions_updated.png)
+ ![alt text](screenshots/thehive_thehive_permissions_updated.png)
 
 Now that the directory permissions has been configured. We can now perform the actual configurations for the TheHive service.
 
@@ -394,13 +396,13 @@ And also for the Elasticsearch under this config file, the hostname must be set 
 
 Lastly, we must change the service's application base url by inputting the public IP address and maintaining the default port of 9000. This is the URL we will use later to access TheHive in our browser.
 
-![alt text](thehive_configs_part2.png)
+![alt text](screenshots/thehive_configs_part2.png)
 
 Then again simply exit and save the config file. 
 
 With the service being configured, we can start and enable it, then verify its status using again "start", "enable", "status" commands, as we used previously.
 
-![alt text](thehive_activepostconfig.png)
+![alt text](screenshots/thehive_activepostconfig.png)
 
 Lastly, since we know access to the TheHive uses port 9000, we must allow this using the ufw tool.
 
@@ -423,17 +425,17 @@ TheHive is now configured completely and is running and ready.
 ## Section 2.2: Configure Wazuh
 For this step, we will access the Wazuh dashboard from inside the Windows VM so we can deploy and install the Wazuh agent directly on the test machine being monitored. This allows the Windows VM to register with the Wazuh manager and begin sending telemetry for detection and alerting.
 
-Since our Wazuh Server is publicly available, we can enter https://20.205.120.231/ in the URL field our browser within the Windows 11 VM to access it. We can use the default credentials of Wazuh to log in.
+Since our Wazuh Server is publicly available, we can enter https://20.205.120.231/ in the URL field our browser within the Windows 11 VM. We can use the default credentials of Wazuh to log in.
 
 
-We are greeted with Wazuh's dashboard after log in.
+We are greeted with Wazuh's dashboard.
 ![](screenshots\wazuh_dashboard.png)
 
-Now, we can go to Deploy a new agent by pressing the button. 
+Now, we can go to Deploy a new agent. 
 
 We will select Windows MSI 32/64 bits. Set our server address to the Wazuh server's public IP. Set an agent name, for this lab, we'll name it "JethLab-Windows".
 
-![alt text](wazuh_config.png)
+![alt text](screenshots/wazuh_config.png)
 
 Then we can install the agent inside our VM using the command provided.
 
@@ -447,13 +449,13 @@ Then simply start the Wazuh service using the command
 
 Wazuh uses ports 1515 and 1514, so we must enable these ports both using the UFW in our VMs, and within Azure
 
-![alt text](wazuh_ufw_ports_1515_1514.png)
+![alt text](screenshots/wazuh_ufw_ports_1515_1514.png)
 
-![alt text](azure_wazuh_allow_ports_1515_1514.png)
+![alt text](screenshots/azure_wazuh_allow_ports_1515_1514.png)
 
 And then restarting the Wazuh Service.
-![alt text](wazuh_restart.png)
+![alt text](screenshots/wazuh_restart.png)
 
 After these configurations, we can now see that we have an active agent in Wazuh, which is our Windows 11 VM.
 
-![alt text](wazuh_agent_active.png)
+![alt text](screenshots/wazuh_agent_active.png)
