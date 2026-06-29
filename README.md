@@ -892,3 +892,15 @@ The received email shows that the Shuffle email action executed correctly and th
 After completing the lab, we successfully built an end-to-end SOC automation workflow. The Windows endpoint generates Sysmon telemetry, Wazuh detects suspicious Mimikatz activity using a custom rule, and Shuffle receives the alert through a webhook. The workflow then enriches the file hash with VirusTotal, creates an alert in TheHive for case management, and sends an email notification to the analyst.
 
 This project demonstrates how SIEM, SOAR, threat intelligence, and case management tools can work together to improve alert handling and reduce manual investigation steps.
+
+### Skills Demonstrated
+- Cloud-based security lab deployment
+- Wazuh SIEM/XDR configuration
+- Windows endpoint telemetry collection
+- Sysmon log forwarding
+- Custom detection rule creation
+- SOAR workflow automation
+- VirusTotal threat intelligence enrichment
+- TheHive case management integration
+- Automated analyst notification
+- End-to-end SOC alert handling
