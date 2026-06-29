@@ -781,7 +781,7 @@ Inside TheHive, we create an organization, we'll name it "JethLab" for the SOC a
 Creating Analyst User:
 ![alt text](screenshots/thehive_account_analyst.png)
 
-Creatingg Servuce Accounting:
+Creating Service Accounting:
 ![alt text](screenshots/thehive_account_service.png)
 
 Now we have two accounts:
