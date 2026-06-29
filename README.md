@@ -763,7 +763,7 @@ This value represents the captured hash from the Shuffle Tools regex output.
 Configuring our VirusTotal in our workflow:
 ![alt text](screenshots/shuffle_vt_config.png)
 
-Once configured correctly, VirusTotal enriches the Wazuh alert with external threat intelligence, validating if the has is known to be malicious or not. This gives the us more context about the detected file without having to manually copy and search the hash.
+Once configured correctly, VirusTotal enriches the Wazuh alert with external threat intelligence, validating whether the file is known to be malicious or not. This gives the us more context about the detected file without having to manually copy and search the hash.
 
 Performing a rerun on our workflow, we can see that VirusTotal succeeded (indicated by the "200" Status)
 ![alt text](screenshots/shuffle_vt_success.png)
