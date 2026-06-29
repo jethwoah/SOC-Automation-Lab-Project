@@ -288,13 +288,13 @@ To configure Cassandra, we must first open it's main configuration file, using t
 
  RPC is how applications, like TheHive, communicate with Cassandra.
 
- ![alt text](screenshots\cassandra_rpcaddress.png)
+ ![alt text](screenshots/cassandra_rpcaddress.png)
 
 Lastly, we must configure our seed. Again, we just change this to the private IP address, but maintaining the default port.
 
 The seed tells Cassandra where the main node is. Since this is a single-server lab, it points to itself.
 
- ![alt text](screenshots\cassandra_seed.png)
+ ![alt text](screenshots/cassandra_seed.png)
 
  Now we can finally save our cassandra configuration file by pressing ^X to exit, then Y to save the file, then just press enter. 
 
@@ -328,7 +328,7 @@ Then we can verify the status of our service using
 
     systemctl status cassandra.service
 
-![alt text](screenshots\cassandra_activepostconfig.png)
+![alt text](screenshots/cassandra_activepostconfig.png)
 
 ### Section 2.1.2 Configuring Elasticsearch for TheHive
 
@@ -347,7 +347,7 @@ Next, we must configure our Network settings. First is to uncomment the network.
 
 We must also uncomment the http.port line, this sets the default port of 9200  (the API port) which TheHive will use to talk to Elasticsearch.
 
-![alt text](screenshots\elasticsearch_nethost_and_port.png)
+![alt text](screenshots/elasticsearch_nethost_and_port.png)
 
 Lastly is to configure our cluster, after uncommenting this line, we can remove "node-2" and just leave "node-1" alone. We do this since we only need to have one Elasticsearch node.
 
@@ -392,7 +392,7 @@ For Cassandra under this config file, we must set the cluster name to match the 
 
 And also for the Elasticsearch under this config file, the hostname must be set to our private IP address.
 
-![alt text](screenshots\elasticsearch_nethost_and_port.png)
+![alt text](screenshots/elasticsearch_nethost_and_port.png)
 
 Lastly, we must change the service's application base url by inputting the public IP address and maintaining the default port of 9000. This is the URL we will use later to access TheHive in our browser.
 
@@ -429,7 +429,7 @@ Since our Wazuh Server is publicly available, we can enter https://20.205.120.23
 
 
 We are greeted with Wazuh's dashboard.
-![](screenshots\wazuh_dashboard.png)
+![](screenshots/wazuh_dashboard.png)
 
 Now, we can go to Deploy a new agent. 
 
@@ -445,7 +445,7 @@ Then simply start the Wazuh service using the command
     
     net start wazuhsvc
 
-![](screenshots\wazuh_service_started.png)
+![](screenshots/wazuh_service_started.png)
 
 Wazuh uses ports 1515 and 1514, so we must enable these ports both using the UFW in our VMs, and within Azure
 
@@ -475,19 +475,19 @@ The Wazuh agent configuration file is located at:
 
 Inside the ossec.conf, we go to the log analysis section and configure the agent to collect Sysmon Operational logs. To do this we must copy the full event channel of Sysmon, which we can get through Event Viewer -> Windows -> Sysmon
 
-![alt text](screenshots\sysmon_event_channel.png)
+![alt text](screenshots/sysmon_event_channel.png)
 
 The Sysmon event channel is:
 Microsoft-Windows-Sysmon/Operational
 
 We will plug this in in our ossec.conf file for Wazuh to ingest logs from Sysmon. Specifically, this tells the Wazuh agent to collect logs from the Sysmon Operational event channel and treat them as Windows Event Channel logs.
-![alt text](screenshots\wazuh_ossec_configured.png)
+![alt text](screenshots/wazuh_ossec_configured.png)
 
 Since we edited Wazuh's configuration file, we must restart the service again.
 
 Going to the Discover window in Wazuh, and filtering our results using the keyword "sysmon". We can inspect one event and see that the provider name is indeed Windows Sysmon. 
 
-![alt text](screenshots\wazuh_sysmon_sample.png)
+![alt text](screenshots/wazuh_sysmon_sample.png)
 
 This validates that Wazuh does indeed ingest logs from Sysmon
 
@@ -502,20 +502,20 @@ For this to work we must turn off Windows Defender within our VM.
 
 
 
-![alt text](screenshots\windows_defender_off.png)
+![alt text](screenshots/windows_defender_off.png)
 
 We can now download a copy of Mimikatz from a Github repository, specifically this one is maintained by gentilkiwi
-![alt text](screenshots\mimikatz_download.png)
+![alt text](screenshots/mimikatz_download.png)
 
 After extracting this download, we can open the folder containing mimikatz.exe then open powershell from there, or alternatively open powershell and cd into that directory. Either way, we can execute mimikatz.exe using the command
         
     .\mimikatz.exe
 
-![alt text](screenshots\mimikatz_execute.png)
+![alt text](screenshots/mimikatz_execute.png)
 
 Now that we ran mimikatz.exe, this must show in Wazuh. But if we searched for Mimikatz, no results would appear, if we were under the index of "wazuh-alerts". 
 
-![alt text](screenshots\wazuh_mimkatz_no_results.png)
+![alt text](screenshots/wazuh_mimkatz_no_results.png)
 
 This is because no custom rules has been set up yet to generate an alert of this type of activity from Mimikatz (setting up custom rules in Wazuh is one of our goals for this lab, and will be done later)
 
@@ -525,7 +525,7 @@ Before creating custom detection rules in Wazuh, we will first have to do some c
 
 We will change logall from no to yes, and do the same for logall_json
 
-![alt text](screenshots\wazuh_server_ossec_conf.png)
+![alt text](screenshots/wazuh_server_ossec_conf.png)
 
 With this, we are enabling Wazuh to save all received logs. This is needed because Mimikatz activity may appear first as raw Sysmon telemetry, but not yet as a Wazuh alert (until we create a custom rule).
 
@@ -533,7 +533,7 @@ Since we changed Wazuh's configuration, we must again restart the service. Also 
 
     systemctl restart wazuh-manager.service
 
-![alt text](screenshots\wazuh_server_restart_manager.png)
+![alt text](screenshots/wazuh_server_restart_manager.png)
 (This restarts the Wazuh manager service on the Ubuntu Wazuh server, not on the Windows VM).
 
 Since we enabled logall, we can verify that Wazuh is logging everything, specifically in the folder /var/ossec/logs/archives. We can list down this folder's contents using the command
@@ -541,7 +541,7 @@ Since we enabled logall, we can verify that Wazuh is logging everything, specifi
     cd /var/ossec/logs/archives
     ls -la
 
-![alt text](screenshots\wazuh_server_archives.png)
+![alt text](screenshots/wazuh_server_archives.png)
 
 Next thing to configure is filebeat.yml. We can use nano to edit this. 
 
@@ -555,12 +555,12 @@ So we must enable the "archives" module so raw Wazuh archive logs can be indexed
 
 
 
-![alt text](screenshots\wazuh_server_filebeat.png)
+![alt text](screenshots/wazuh_server_filebeat.png)
 
 
 
 Then since we edited the configuration file of filebeat, we must also restart this service
-![alt text](screenshots\wazuh_server_filebeat_restart.png)
+![alt text](screenshots/wazuh_server_filebeat_restart.png)
 
 Now our manager configurations are completed. 
 
@@ -570,22 +570,22 @@ An index is a storage location for logs and alerts. Wazuh stores different types
 
 Then we can search for the Wazuh archive logs, by matching the index pattern. 
 
-![alt text](screenshots\wazuh_index_pattern_part1.png)
+![alt text](screenshots/wazuh_index_pattern_part1.png)
 
 Wazuh will ask us for a time field after this, we can select timestamp to sort and filter the logs by time. Then we can create the index pattern.
 
-![alt text](screenshots\wazuh_index_pattern_part2.png)
+![alt text](screenshots/wazuh_index_pattern_part2.png)
 
 Going back to Discover, we can see that we now have a new index, wazuh-archives*
 
-![alt text](screenshots\wazuh_new_index.png)
+![alt text](screenshots/wazuh_new_index.png)
 Ultimately, creating the new wazuh-archives-* index allowed us to view raw logs. 
 
 Before this, Wazuh was only showing events that were triggered by alerts (in wazuh-alerts index), it was harder to view raw Sysmon telemetry. By enabling archives and creating the mew wazuh-archives* index, we are able to view raw telemetry, which we could use to create a custom rules to turn raw events into alerts.
 
 To verify this, we can run mimikatz.exe again, and monitor the alerts from wazuh-archives. Now we can see that running mimikatz.exe did indeed generate telemetry, which we can view under wazuh-archives*.
 
-![alt text](screenshots\wazuh_mimikatz_archives.png)
+![alt text](screenshots/wazuh_mimikatz_archives.png)
 
 
 ## Section 3.4 Setting Up Custom Detection Rules in Wazuh
@@ -647,7 +647,7 @@ This custom rule tells Wazuh: “If a Sysmon process creation event shows mimika
 
 To check if our rule works, we can run mimikatz.exe again, then check under wazuh-alerts.
 
-![alt text](screenshots\wazuh_mimikatz_alert.png)
+![alt text](screenshots/wazuh_mimikatz_alert.png)
 
 We can see that we do have 1 hit from our wazuh-alerts index after running mimikatz.exe again. Inspecting this alert, the rule description is Mimikatz Usage Detected.
 
@@ -664,7 +664,7 @@ This is the last part of this lab, here we will be combining all the tools we ha
 We begin by creating a new workflow in Shuffle. This workflow acts as the SOAR playbook that receives alerts from Wazuh and performs automated actions.
 
 Here we have our blank workflow, starting from scratch.
-![alt text](screenshots\shuffle_blank.png)
+![alt text](screenshots/shuffle_blank.png)
 
 The first component added to the workflow is a Webhook. The webhook provides a unique URL that Wazuh can send alerts to. 
 
@@ -679,7 +679,7 @@ We edit the Wazuh manager configuration file:
     sudo nano /var/ossec/etc/ossec.conf
 
 Inside the configuration, we add a Shuffle integration block:
-![alt text](screenshots\wazuh_integration.png)
+![alt text](screenshots/wazuh_integration.png)
 
 ```xml
 <integration> <name>shuffle</name> <hook_url>[WEBHOOK_URI]</hook_url> <rule_id>100002</rule_id> <alert_format>json</alert_format> </integration>
@@ -713,7 +713,7 @@ After starting the integration, we can trigger the custom Mimikatz alert again i
 Once the alert triggers, we can check Shuffle’s workflow runs. The webhook should receive a Wazuh alert containing the custom rule details, host information, event data, and the full raw log.
 
 We can see a new run
-![alt text](screenshots\shuffle_new_run.png)
+![alt text](screenshots/shuffle_new_run.png)
 
 This confirms that Wazuh is successfully sending the custom alert to Shuffle. At this point, the detection pipeline is no longer limited to Wazuh; it can now trigger automated response actions.
 
@@ -721,7 +721,7 @@ This confirms that Wazuh is successfully sending the custom alert to Shuffle. At
 
 After confirming that Shuffle receives the alert, we add a Shuffle Tools step to extract the SHA256 hash from the alert data.
 
-![alt text](screenshots\shuffle_sha256_topo.png)
+![alt text](screenshots/shuffle_sha256_topo.png)
 
 The regex used is:
 ```xml
@@ -748,7 +748,7 @@ SHA256=
 Next, we add the VirusTotal app to the Shuffle workflow and authenticate it using a VirusTotal API key.
 
 VirusTotal authentication:
-![alt text](screenshots\shuffle_VT_auth.png)
+![alt text](screenshots/shuffle_VT_auth.png)
 
 After extracting the SHA256 hash from the Wazuh alert, we add the VirusTotal v3 app to the Shuffle workflow. The selected action is: "Get a hash report"
 
@@ -761,12 +761,12 @@ In the Id field, we input the SHA256 value extracted from the previous regex ste
 This value represents the captured hash from the Shuffle Tools regex output.
 
 Configuring our VirusTotal in our workflow:
-![alt text](screenshots\shuffle_vt_config.png)
+![alt text](screenshots/shuffle_vt_config.png)
 
 Once configured correctly, VirusTotal enriches the Wazuh alert with external threat intelligence, validating if the has is known to be malicious or not. This gives the us more context about the detected file without having to manually copy and search the hash.
 
 Performing a rerun on our workflow, we can see that VirusTotal succeeded (indicated by the "200" Status)
-![alt text](screenshots\shuffle_vt_success.png)
+![alt text](screenshots/shuffle_vt_success.png)
 
 ## 4.6 Prepare TheHive for Case Management
 
@@ -779,16 +779,16 @@ Inside TheHive, we create an organization, we'll name it "JethLab" for the SOC a
 
 
 Creating Analyst User:
-![alt text](screenshots\thehive_account_analyst.png)
+![alt text](screenshots/thehive_account_analyst.png)
 
 Creatingg Servuce Accounting:
-![alt text](screenshots\thehive_account_service.png)
+![alt text](screenshots/thehive_account_service.png)
 
 Now we have two accounts:
-![alt text](screenshots\thehive._accounts.png)
+![alt text](screenshots/thehive._accounts.png)
 
 For the service account, we generate an API key.
-![alt text](screenshots\thehive_api_create.png)
+![alt text](screenshots/thehive_api_create.png)
 
 ## 4.7 Connect Shuffle to TheHive
 
@@ -798,10 +798,10 @@ The TheHive URL is configured as:
 
     http://<THEHIVE_PUBLIC_IP>:9000
 
-![alt text](screenshots\shuffle_thehive_auth.png)
+![alt text](screenshots/shuffle_thehive_auth.png)
 
 The selected TheHive action is: "Create alert"
-![alt text](screenshots\shuffle_thehive_config.png)
+![alt text](screenshots/shuffle_thehive_config.png)
 
 We configure the alert fields using data from the Wazuh alert. This JSON configuration defines how Shuffle creates an alert in TheHive after receiving the custom Wazuh Mimikatz detection.
 
@@ -852,18 +852,18 @@ We configure the alert fields using data from the Wazuh alert. This JSON configu
 Overall, this configuration turns the Wazuh detection into a structured TheHive alert.
 
 This shows our topology so far:
-![alt text](screenshots\shuffle_thehive_topo.png)
+![alt text](screenshots/shuffle_thehive_topo.png)
 
 To verify our workflow so far, we can run mimikatz.exe again in the Windows VM, which activates the workflow.
 
-![alt key](screenshots\thehive_alert_created.png)
+![alt key](screenshots/thehive_alert_created.png)
 
 This validates that Shuffle can automatically create a TheHive alert from a Wazuh detection. This completes the alert handoff from SIEM detection to case management.
 
 ## 4.9 Add Email Notification to SOC Analyst
 
 Finally, we add an email notification step in Shuffle. This sends a message to the SOC analyst when the Mimikatz detection workflow runs.
-![alt text](screenshots\thehive_email_config.png)
+![alt text](screenshots/thehive_email_config.png)
 
 The email action is configured with the recipient email address, subject, and body.
 
@@ -879,14 +879,14 @@ This leaves us with our final workflow:
 
 This final Shuffle workflow connects the full SOC automation path: the Wazuh alert enters through the webhook, Shuffle processes the alert and sends the extracted hash to VirusTotal for enrichment, then the workflow branches into TheHive for alert/case creation and Email for analyst notification. The green connections show that the actions are properly linked in sequence, so the final run should validate the complete pipeline: detection from Wazuh, enrichment through VirusTotal, case management in TheHive, and notification through email.
 
-![alt text](screenshots\shuffle_final_topo.png)
+![alt text](screenshots/shuffle_final_topo.png)
 
 
 Again, running mimikatz.exe on the Windows VM. We confirm that the email notification is successfully delivered to the configured recipient inbox.
 
 The received email shows that the Shuffle email action executed correctly and that the automation can notify an analyst when the workflow is triggered.
 
-![alt text](screenshots\email_received.png)
+![alt text](screenshots/email_received.png)
 
 # Final Outcome
 After completing the lab, we successfully built an end-to-end SOC automation workflow. The Windows endpoint generates Sysmon telemetry, Wazuh detects suspicious Mimikatz activity using a custom rule, and Shuffle receives the alert through a webhook. The workflow then enriches the file hash with VirusTotal, creates an alert in TheHive for case management, and sends an email notification to the analyst.
